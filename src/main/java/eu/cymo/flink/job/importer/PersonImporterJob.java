@@ -5,6 +5,7 @@ import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.formats.json.JsonDeserializationSchema;
 import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -25,12 +26,14 @@ public class PersonImporterJob {
                 .setProperties(PropertiesLoader.loadKafkaProperties())
                 .setTopics(Topics.TOPIC_CMS_PERSON)
                 .setStartingOffsets(OffsetsInitializer.latest())
+                .setValueOnlyDeserializer(new JsonDeserializationSchema<>(CmsPerson.class))
                 .build();
         
         var analyticsSource = KafkaSource.<AnalyticsPerson>builder()
                 .setProperties(PropertiesLoader.loadKafkaProperties())
                 .setTopics(Topics.TOPIC_ANALYTICS_PERSON)
                 .setStartingOffsets(OffsetsInitializer.latest())
+                .setValueOnlyDeserializer(new JsonDeserializationSchema<>(AnalyticsPerson.class))
                 .build();
         
         var serializer = KafkaRecordSerializationSchema.<Person>builder()
